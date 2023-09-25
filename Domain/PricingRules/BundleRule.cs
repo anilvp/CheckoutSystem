@@ -4,36 +4,36 @@ namespace Domain.PricingRules;
 
 public class BundleRule : IRule
 {
-    public BundleRule(List<string> productIds, float price)
+    public BundleRule(List<string> itemIds, float price)
     {
-        ProductIds = productIds;
+        ItemIds = itemIds;
         Price = price;
     }
 
-    public (Dictionary<Item, int>, float) ApplyPricingRuleToBasket(Dictionary<Item, int> basket, float total)
+    public (Dictionary<string, int>, float) ApplyPricingRuleToBasket(Dictionary<string, int> basket,
+                                                                     Dictionary<string, float> prices,
+                                                                     float total)
     {
-        if (basket.Keys.Select(x => x.Id).Intersect(ProductIds).Count() == ProductIds.Count())
+        if (basket.Keys.Intersect(ItemIds).Count() == ItemIds.Count)
         {
-            int minQuantityOfProductInBundle = basket[basket.Keys.Where(x => x.Id == ProductIds[0]).Single()];
-            foreach (string id in ProductIds)
+            int minQuantityOfProductInBundle = basket[ItemIds[0]];
+            foreach (string itemId in ItemIds)
             {
-                Item item = basket.Keys.Where(x => x.Id == id).Single();
-                if (basket[item] < minQuantityOfProductInBundle)
+                if (basket[itemId] < minQuantityOfProductInBundle)
                 {
-                    minQuantityOfProductInBundle = basket[item];
+                    minQuantityOfProductInBundle = basket[itemId];
                 }
             }
-            foreach (string id in ProductIds)
+            foreach (string itemId in ItemIds)
             {
-                Item item = basket.Keys.Where(x => x.Id == id).Single();
-                basket[item] -= minQuantityOfProductInBundle;
+                basket[itemId] -= minQuantityOfProductInBundle;
             }
             total += Price * minQuantityOfProductInBundle;
         }
         return (basket, total);
     }
 
-    List<string> ProductIds;
+    List<string> ItemIds;
 
     float Price;
 }

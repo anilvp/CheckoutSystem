@@ -7,37 +7,41 @@ public class Checkout
     public Checkout(List<IRule> pricingRules)
     {
         PricingRules = pricingRules;
-        Basket = new Dictionary<Item, int>();
+        Basket = new Dictionary<string, int>();
+        Prices = new Dictionary<string, float>();
     }
 
-    public void Scan(Item item)
+    public void Scan(string itemId, float price)
     {
-        if (Basket.TryGetValue(item, out int _))
+        if (Basket.TryGetValue(itemId, out int _))
         {
-            Basket[item] += 1;
+            Basket[itemId] += 1;
         }
         else
         {
-            Basket[item] = 1;
+            Basket[itemId] = 1;
         }
+        Prices[itemId] = price;
     }
 
     public float CalculateTotal()
     {
         float total = 0;
-        Dictionary<Item, int> remainingItems = new Dictionary<Item, int>(Basket);
+        Dictionary<string, int> remainingItems = new(Basket);
         foreach (IRule rule in PricingRules)
         {
-            (remainingItems, total) = rule.ApplyPricingRuleToBasket(remainingItems, total);
+            (remainingItems, total) = rule.ApplyPricingRuleToBasket(remainingItems, Prices, total);
         }
-        foreach (Item item in remainingItems.Keys)
+        foreach (string itemId in remainingItems.Keys)
         {
-            total += item.Price * remainingItems[item];
+            total += Prices[itemId] * remainingItems[itemId];
         }
         return total;
     }
 
     public List<IRule> PricingRules { get; private set; }
 
-    public Dictionary<Item, int> Basket { get; private set; }
+    public Dictionary<string, int> Basket { get; private set; }
+
+    public Dictionary<string, float> Prices { get; private set; }
 }

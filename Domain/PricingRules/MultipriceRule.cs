@@ -4,25 +4,26 @@ namespace Domain.PricingRules;
 
 public class MultipriceRule : IRule
 {
-    public MultipriceRule(string productId, int quantity, float price)
+    public MultipriceRule(string itemId, int quantity, float price)
     {
-        ProductId = productId;
+        ItemId = itemId;
         Quantity = quantity;
         Price = price;
     }
 
-    public (Dictionary<Item, int>, float) ApplyPricingRuleToBasket(Dictionary<Item, int> basket, float total)
+    public (Dictionary<string, int>, float) ApplyPricingRuleToBasket(Dictionary<string, int> basket,
+                                                                     Dictionary<string, float> prices,
+                                                                     float total)
     {
-        if (basket.Keys.Select(x => x.Id).Contains(ProductId))
+        if (basket.ContainsKey(ItemId))
         {
-            Item item = basket.Keys.Where(x => x.Id == ProductId).Single();
-            total += (basket[item] / Quantity) * Price;
-            basket[item] -= (basket[item] / Quantity) * Quantity;
+            total += (basket[ItemId] / Quantity) * Price;
+            basket[ItemId] -= (basket[ItemId] / Quantity) * Quantity;
         }
         return (basket, total);
     }
 
-    string ProductId;
+    string ItemId;
 
     int Quantity;
 

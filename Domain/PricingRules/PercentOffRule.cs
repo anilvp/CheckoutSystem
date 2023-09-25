@@ -4,24 +4,25 @@ namespace Domain.PricingRules;
 
 public class PercentOffRule : IRule
 {
-    public PercentOffRule(string productId, float percentage)
+    public PercentOffRule(string itemId, float percentage)
     {
-        ProductId = productId;
+        ItemId = itemId;
         Percentage = percentage;
     }
 
-    public (Dictionary<Item, int>, float) ApplyPricingRuleToBasket(Dictionary<Item, int> basket, float total)
+    public (Dictionary<string, int>, float) ApplyPricingRuleToBasket(Dictionary<string, int> basket,
+                                                                     Dictionary<string, float> prices,
+                                                                     float total)
     {
-        if (basket.Keys.Select(x => x.Id).Contains(ProductId))
+        if (basket.ContainsKey(ItemId))
         {
-            Item item = basket.Keys.Where(x => x.Id == ProductId).Single();
-            total += (item.Price - item.Price * Percentage / 100) * basket[item];
-            basket[item] = 0;
+            total += (prices[ItemId] - prices[ItemId] * Percentage / 100) * basket[ItemId];
+            basket[ItemId] = 0;
         }
         return (basket, total);
     }
 
-    string ProductId;
+    string ItemId;
 
     float Percentage;
 }

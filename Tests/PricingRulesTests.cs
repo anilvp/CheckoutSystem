@@ -6,49 +6,44 @@ namespace Tests;
 [TestClass]
 public class PricingRulesTests
 {
-    readonly Item A = new Item("A", 50);
-    readonly Item B = new Item("B", 30);
-    readonly Item C = new Item("C", 20);
-
-
 
     [TestMethod]
     public void MultipriceRule_RuleConditionsMet_OfferApplied()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { {A, 3} };
+        Dictionary<string, int> basket = new Dictionary<string, int> { {"A", 3} };
         float total = 0;
         MultipriceRule multipriceRule = new MultipriceRule("A", 3, 130);
 
-        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, new Dictionary<string, float>(), total);
 
         Assert.AreEqual(130, total);
-        Assert.AreEqual(0, basket[A]);
+        Assert.AreEqual(0, basket["A"]);
     }
 
     [TestMethod]
     public void MultipriceRule_RuleConditionsMetMultipleTimes_OfferAppliedMultipleTimes()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { { A, 10 } };
+        Dictionary<string, int> basket = new Dictionary<string, int> { { "A", 10 } };
         float total = 0;
         MultipriceRule multipriceRule = new MultipriceRule("A", 3, 130);
 
-        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, new Dictionary<string, float>(), total);
 
         Assert.AreEqual(390, total);
-        Assert.AreEqual(1, basket[A]);
+        Assert.AreEqual(1, basket["A"]);
     }
 
     [TestMethod]
     public void MultipriceRule_RuleConditionsNotMet_OfferNotApplied()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { { A, 1 } };
+        Dictionary<string, int> basket = new Dictionary<string, int> { { "A", 1 } };
         float total = 0;
         MultipriceRule multipriceRule = new MultipriceRule("A", 3, 130);
 
-        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = multipriceRule.ApplyPricingRuleToBasket(basket, new Dictionary<string, float>(), total);
 
         Assert.AreEqual(0, total);
-        Assert.AreEqual(1, basket[A]);
+        Assert.AreEqual(1, basket["A"]);
     }
 
 
@@ -56,14 +51,15 @@ public class PricingRulesTests
     [TestMethod]
     public void PercentOffRule_RuleConditionsMet_OfferApplied()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { { A, 3 } };
+        Dictionary<string, int> basket = new Dictionary<string, int> { { "A", 3 } };
+        Dictionary<string, float> prices = new Dictionary<string, float> { { "A", 50 } };
         float total = 0;
         PercentOffRule percentOffRule = new PercentOffRule("A", 30);
 
-        (basket, total) = percentOffRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = percentOffRule.ApplyPricingRuleToBasket(basket, prices, total);
 
         Assert.AreEqual(105, total);
-        Assert.AreEqual(0, basket[A]);
+        Assert.AreEqual(0, basket["A"]);
     }
 
 
@@ -71,29 +67,29 @@ public class PricingRulesTests
     [TestMethod]
     public void BundleRule_RuleConditionsMet_OfferApplied()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { { A, 3 }, { B, 3 }, { C, 2 } };
+        Dictionary<string, int> basket = new Dictionary<string, int> { { "A", 3 }, { "B", 3 }, { "C", 2 } };
         float total = 0;
         BundleRule bundleRule = new BundleRule(new List<string> {"A", "B", "C"}, 75);
 
-        (basket, total) = bundleRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = bundleRule.ApplyPricingRuleToBasket(basket, new Dictionary<string, float>(), total);
 
         Assert.AreEqual(150, total);
-        Assert.AreEqual(1, basket[A]);
-        Assert.AreEqual(1, basket[B]);
-        Assert.AreEqual(0, basket[C]);
+        Assert.AreEqual(1, basket["A"]);
+        Assert.AreEqual(1, basket["B"]);
+        Assert.AreEqual(0, basket["C"]);
     }
 
     [TestMethod]
     public void BundleRule_BasketOnlyContainsPartOfBundle_OfferNotApplied()
     {
-        Dictionary<Item, int> basket = new Dictionary<Item, int> { { A, 3 }, { C, 2 } };
+        Dictionary<string, int> basket = new Dictionary<string, int> { { "A", 3 }, { "C", 2 } };
         float total = 0;
         BundleRule bundleRule = new BundleRule(new List<string> { "A", "B", "C" }, 75);
 
-        (basket, total) = bundleRule.ApplyPricingRuleToBasket(basket, total);
+        (basket, total) = bundleRule.ApplyPricingRuleToBasket(basket, new Dictionary<string, float>(), total);
 
         Assert.AreEqual(0, total);
-        Assert.AreEqual(3, basket[A]);
-        Assert.AreEqual(2, basket[C]);
+        Assert.AreEqual(3, basket["A"]);
+        Assert.AreEqual(2, basket["C"]);
     }
 }
